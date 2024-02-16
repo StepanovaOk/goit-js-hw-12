@@ -164,3 +164,7 @@
 .visible {
   display: inline-block;
 }
+
+.load-btn {
+  visibility: hidden;
+}

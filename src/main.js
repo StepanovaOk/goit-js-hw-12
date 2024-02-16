@@ -11,6 +11,8 @@ const axios = Axios.create({
     image_type: 'photo',
     orientation: 'horizontal',
     safesearch: true,
+    per_page: 15,
+    page: 1,
   },
 });
 
@@ -23,6 +25,9 @@ const form = document.querySelector('.form');
 const searchInput = document.querySelector('.input-name');
 const loader = document.querySelector('.loader');
 const gallery = document.querySelector('.gallery');
+const loadBtn = document.querySelector('.load-btn');
+let page = 1;
+let currentSearchQuery = '';
 
 form.addEventListener('submit', getPhoto);
 
@@ -39,11 +44,36 @@ async function getPhoto(event) {
     return;
   }
 
+  if (searchQuery !== currentSearchQuery) {
+    page = 1;
+    currentSearchQuery = searchQuery;
+  }
+
   loader.classList.add('visible');
 
   try {
     const response = await axios.get('/api/', {
       params: { q: searchQuery },
+    });
+    const data = response.data;
+    renderPhotos(data.hits);
+  } catch (error) {
+    console.log('Error fetching data:', error);
+  } finally {
+    loader.classList.remove('visible');
+  }
+}
+
+loadBtn.addEventListener('click', onLoadMoreClick);
+
+async function onLoadMoreClick() {
+  const searchQuery = searchInput.value.trim();
+
+  loader.classList.add('visible');
+
+  try {
+    const response = await axios.get('/api/', {
+      params: { q: searchQuery, page: (page += 1) },
     });
     const data = response.data;
     renderPhotos(data.hits);
@@ -114,4 +144,9 @@ function renderPhotos(photos) {
   });
 
   galleryLightbox.refresh();
+  showLoadBtn();
+}
+
+function showLoadBtn() {
+  loadBtn.style.visibility = 'visible';
 }
