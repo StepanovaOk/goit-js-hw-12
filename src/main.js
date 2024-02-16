@@ -2,6 +2,17 @@ import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
+import Axios from 'axios';
+
+const axios = Axios.create({
+  baseURL: 'https://pixabay.com',
+  params: {
+    key: '42310325-d8e2b88bd4f4d7db9639050a5',
+    image_type: 'photo',
+    orientation: 'horizontal',
+    safesearch: true,
+  },
+});
 
 let galleryLightbox = new SimpleLightbox('.image-link', {
   captionsData: 'alt',
@@ -11,12 +22,11 @@ let galleryLightbox = new SimpleLightbox('.image-link', {
 const form = document.querySelector('.form');
 const searchInput = document.querySelector('.input-name');
 const loader = document.querySelector('.loader');
-
 const gallery = document.querySelector('.gallery');
 
 form.addEventListener('submit', getPhoto);
 
-function getPhoto(event) {
+async function getPhoto(event) {
   event.preventDefault();
 
   const searchQuery = searchInput.value.trim();
@@ -26,33 +36,22 @@ function getPhoto(event) {
       title: 'Error',
       message: 'Please enter a search query',
     });
+    return;
   }
-
-  const BASE_URL = 'https://pixabay.com';
-  const END_POINT = '/api/';
-  const API_KEY = '42310325-d8e2b88bd4f4d7db9639050a5';
-  const params = new URLSearchParams({
-    key: API_KEY,
-    q: searchQuery,
-    image_type: 'photo',
-    orientation: 'horizontal',
-    safesearch: true,
-  });
-
-  const url = `${BASE_URL}${END_POINT}?${params}`;
 
   loader.classList.add('visible');
 
-  fetch(url)
-    .then(res => res.json())
-    .then(data => {
-      renderPhotos(data.hits);
-      loader.classList.remove('visible');
-    })
-    .catch(error => {
-      console.log('Error fetching data:', error);
-      loader.classList.remove('visible');
+  try {
+    const response = await axios.get('/api/', {
+      params: { q: searchQuery },
     });
+    const data = response.data;
+    renderPhotos(data.hits);
+  } catch (error) {
+    console.log('Error fetching data:', error);
+  } finally {
+    loader.classList.remove('visible');
+  }
 }
 
 function makeMarkup(
@@ -75,7 +74,7 @@ function makeMarkup(
         <p class="description-item"> Views ${views}</p>
         <p class="description-item"> Comments ${comments}</p>
         <p class="description-item"> Downloads ${downloads}</p>
-    
+
     </div>
   </li>`;
 }
