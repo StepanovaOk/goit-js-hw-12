@@ -73,6 +73,7 @@ function renderPhotos(photos, totalHits, totalResult) {
       messageColor: 'white',
       messageSize: '25',
     });
+    return;
   }
 
   photos.forEach(photo => {
