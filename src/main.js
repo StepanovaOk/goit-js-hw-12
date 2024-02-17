@@ -60,7 +60,6 @@ async function getPhoto(event) {
     const data = response.data;
     totalHits = data.totalHits;
     totalResult = renderPhotos(data.hits, totalHits, totalResult);
-    renderPhotos(data.hits, totalHits);
   } catch (error) {
     console.log('Error fetching data:', error);
   } finally {
@@ -80,10 +79,9 @@ async function onLoadMoreClick() {
       params: { q: searchQuery, page: (page += 1) },
     });
     const data = response.data;
-    renderPhotos(data.hits);
+
     totalHits = data.totalHits;
     totalResult = renderPhotos(data.hits, totalHits, totalResult);
-    isLoadMore(totalResult, totalHits);
   } catch (error) {
     console.log('Error fetching data:', error);
   } finally {
