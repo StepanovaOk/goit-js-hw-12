@@ -4,6 +4,16 @@ import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 import Axios from 'axios';
 
+const form = document.querySelector('.form');
+const searchInput = document.querySelector('.input-name');
+const loader = document.querySelector('.loader');
+const gallery = document.querySelector('.gallery');
+const loadBtn = document.querySelector('.load-btn');
+let currentSearchQuery = '';
+let totalResult = 0;
+let totalHits = 0;
+let page = 1;
+
 const axios = Axios.create({
   baseURL: 'https://pixabay.com',
   params: {
@@ -20,18 +30,6 @@ let galleryLightbox = new SimpleLightbox('.image-link', {
   captionsData: 'alt',
   captionDelay: 250,
 });
-
-const form = document.querySelector('.form');
-const searchInput = document.querySelector('.input-name');
-const loader = document.querySelector('.loader');
-const gallery = document.querySelector('.gallery');
-const loadBtn = document.querySelector('.load-btn');
-let page = 1;
-let currentSearchQuery = '';
-let totalResult = 0;
-let totalHits = 0;
-
-form.addEventListener('submit', getPhoto);
 
 async function getPhoto(event) {
   event.preventDefault();
@@ -50,12 +48,6 @@ async function getPhoto(event) {
   page = 1;
   totalResult = 0;
   hideLoadBtn();
-
-  if (searchQuery !== currentSearchQuery) {
-    page = 1;
-    currentSearchQuery = searchQuery;
-  }
-
   loader.classList.add('visible');
 
   try {
@@ -72,55 +64,6 @@ async function getPhoto(event) {
   }
 }
 
-loadBtn.addEventListener('click', onLoadMoreClick);
-
-async function onLoadMoreClick() {
-  hideLoadBtn();
-  const searchQuery = searchInput.value.trim();
-
-  loader.classList.add('visible');
-
-  try {
-    const response = await axios.get('/api/', {
-      params: { q: searchQuery, page: (page += 1) },
-    });
-    const data = response.data;
-
-    totalHits = data.totalHits;
-    totalResult = renderPhotos(data.hits, totalHits, totalResult);
-    smoothScrollToNextGallery();
-  } catch (error) {
-    console.log('Error fetching data:', error);
-  } finally {
-    loader.classList.remove('visible');
-  }
-}
-
-function makeMarkup(
-  webformatURL,
-  largeImageURL,
-  tags,
-  likes,
-  views,
-  comments,
-  downloads
-) {
-  return `<li class="photo">
-  <div class="photo-card">
-    <a class="image-link" data-lightbox="image" href="${largeImageURL}">
-    <img class="gallery-image" data-source="${largeImageURL}"  src="${webformatURL}" alt="${tags}"></img>
-    </a>
-    </div>
-      <div class="description">
-        <p class="description-item"> Likes ${likes}</p>
-        <p class="description-item"> Views ${views}</p>
-        <p class="description-item"> Comments ${comments}</p>
-        <p class="description-item"> Downloads ${downloads}</p>
-
-    </div>
-  </li>`;
-}
-
 function renderPhotos(photos, totalHits, totalResult) {
   if (photos.length === 0) {
     iziToast.show({
@@ -130,7 +73,6 @@ function renderPhotos(photos, totalHits, totalResult) {
       messageColor: 'white',
       messageSize: '25',
     });
-    return totalResult;
   }
 
   photos.forEach(photo => {
@@ -163,19 +105,58 @@ function renderPhotos(photos, totalHits, totalResult) {
   return totalResult;
 }
 
-function showLoadBtn() {
-  loadBtn.style.visibility = 'visible';
+function makeMarkup(
+  webformatURL,
+  largeImageURL,
+  tags,
+  likes,
+  views,
+  comments,
+  downloads
+) {
+  return `<li class="photo">
+  <div class="photo-card">
+    <a class="image-link" data-lightbox="image" href="${largeImageURL}">
+    <img class="gallery-image" data-source="${largeImageURL}"  src="${webformatURL}" alt="${tags}"></img>
+    </a>
+    </div>
+      <div class="description">
+        <p class="description-item"> Likes ${likes}</p>
+        <p class="description-item"> Views ${views}</p>
+        <p class="description-item"> Comments ${comments}</p>
+        <p class="description-item"> Downloads ${downloads}</p>
+
+    </div>
+  </li>`;
 }
 
-function hideLoadBtn() {
-  loadBtn.style.visibility = 'hidden';
+async function onLoadMoreClick() {
+  hideLoadBtn();
+  loader.classList.add('visible');
+
+  const searchQuery = searchInput.value.trim();
+
+  try {
+    const response = await axios.get('/api/', {
+      params: { q: searchQuery, page: (page += 1) },
+    });
+    const data = response.data;
+
+    totalHits = data.totalHits;
+    totalResult = renderPhotos(data.hits, totalHits, totalResult);
+    smoothScrollToNextGallery();
+  } catch (error) {
+    console.log('Error fetching data:', error);
+  } finally {
+    loader.classList.remove('visible');
+  }
 }
 
 function isLoadMore(totalResult, totalHits) {
   if (totalResult >= totalHits) {
     iziToast.show({
       message: "We're sorry, but you've reached the end of search results.",
-      backgroundColor: 'red',
+      backgroundColor: '#125487',
       messageColor: 'white',
       messageSize: '25',
     });
@@ -192,3 +173,14 @@ function smoothScrollToNextGallery() {
     .getBoundingClientRect().height;
   window.scrollBy({ top: galleryItemHeight * 2, behavior: 'smooth' });
 }
+
+function showLoadBtn() {
+  loadBtn.style.visibility = 'visible';
+}
+
+function hideLoadBtn() {
+  loadBtn.style.visibility = 'hidden';
+}
+
+form.addEventListener('submit', getPhoto);
+loadBtn.addEventListener('click', onLoadMoreClick);
