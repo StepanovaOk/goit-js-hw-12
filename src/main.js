@@ -21,7 +21,7 @@ const axios = Axios.create({
     image_type: 'photo',
     orientation: 'horizontal',
     safesearch: true,
-    per_page: 150,
+    per_page: 15,
     page: 1,
   },
 });
