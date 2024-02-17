@@ -11,7 +11,7 @@ const axios = Axios.create({
     image_type: 'photo',
     orientation: 'horizontal',
     safesearch: true,
-    per_page: 15,
+    per_page: 150,
     page: 1,
   },
 });
@@ -28,6 +28,8 @@ const gallery = document.querySelector('.gallery');
 const loadBtn = document.querySelector('.load-btn');
 let page = 1;
 let currentSearchQuery = '';
+let totalResult = 0;
+let totalHits = 0;
 
 form.addEventListener('submit', getPhoto);
 
@@ -56,7 +58,9 @@ async function getPhoto(event) {
       params: { q: searchQuery },
     });
     const data = response.data;
-    renderPhotos(data.hits);
+    totalHits = data.totalHits;
+    totalResult = renderPhotos(data.hits, totalHits, totalResult);
+    renderPhotos(data.hits, totalHits);
   } catch (error) {
     console.log('Error fetching data:', error);
   } finally {
@@ -77,6 +81,9 @@ async function onLoadMoreClick() {
     });
     const data = response.data;
     renderPhotos(data.hits);
+    totalHits = data.totalHits;
+    totalResult = renderPhotos(data.hits, totalHits, totalResult);
+    isLoadMore(totalResult, totalHits);
   } catch (error) {
     console.log('Error fetching data:', error);
   } finally {
@@ -109,9 +116,7 @@ function makeMarkup(
   </li>`;
 }
 
-function renderPhotos(photos) {
-  gallery.innerHTML = '';
-
+function renderPhotos(photos, totalHits, totalResult) {
   if (photos.length === 0) {
     iziToast.show({
       message:
@@ -120,6 +125,7 @@ function renderPhotos(photos) {
       messageColor: 'white',
       messageSize: '25',
     });
+    return totalResult;
   }
   photos.forEach(photo => {
     const {
@@ -143,10 +149,36 @@ function renderPhotos(photos) {
     gallery.insertAdjacentHTML('beforeend', photoElement);
   });
 
+  totalResult += photos.length;
+
   galleryLightbox.refresh();
-  showLoadBtn();
+
+  isLoadMore(totalResult, totalHits);
+  return totalResult;
 }
 
 function showLoadBtn() {
   loadBtn.style.visibility = 'visible';
+}
+
+function hideLoadBtn() {
+  loadBtn.style.visibility = 'hidden';
+}
+
+function isLoadMore(totalResult, totalHits) {
+  console.log(totalHits);
+  console.log(totalResult);
+
+  if (totalResult >= totalHits) {
+    iziToast.show({
+      message: "We're sorry, but you've reached the end of search results.",
+      backgroundColor: 'red',
+      messageColor: 'white',
+      messageSize: '25',
+    });
+    hideLoadBtn();
+    return;
+  } else {
+    showLoadBtn();
+  }
 }
