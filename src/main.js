@@ -46,6 +46,11 @@ async function getPhoto(event) {
     return;
   }
 
+  gallery.innerHTML = '';
+  page = 1;
+  totalResult = 0;
+  hideLoadBtn();
+
   if (searchQuery !== currentSearchQuery) {
     page = 1;
     currentSearchQuery = searchQuery;
@@ -70,6 +75,7 @@ async function getPhoto(event) {
 loadBtn.addEventListener('click', onLoadMoreClick);
 
 async function onLoadMoreClick() {
+  hideLoadBtn();
   const searchQuery = searchInput.value.trim();
 
   loader.classList.add('visible');
@@ -82,6 +88,7 @@ async function onLoadMoreClick() {
 
     totalHits = data.totalHits;
     totalResult = renderPhotos(data.hits, totalHits, totalResult);
+    smoothScrollToNextGallery();
   } catch (error) {
     console.log('Error fetching data:', error);
   } finally {
@@ -125,6 +132,7 @@ function renderPhotos(photos, totalHits, totalResult) {
     });
     return totalResult;
   }
+
   photos.forEach(photo => {
     const {
       webformatURL,
@@ -164,9 +172,6 @@ function hideLoadBtn() {
 }
 
 function isLoadMore(totalResult, totalHits) {
-  console.log(totalHits);
-  console.log(totalResult);
-
   if (totalResult >= totalHits) {
     iziToast.show({
       message: "We're sorry, but you've reached the end of search results.",
@@ -179,4 +184,11 @@ function isLoadMore(totalResult, totalHits) {
   } else {
     showLoadBtn();
   }
+}
+
+function smoothScrollToNextGallery() {
+  const galleryItemHeight = document
+    .querySelector('.photo')
+    .getBoundingClientRect().height;
+  window.scrollBy({ top: galleryItemHeight * 2, behavior: 'smooth' });
 }

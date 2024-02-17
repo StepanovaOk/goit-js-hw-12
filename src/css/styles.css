@@ -15,7 +15,7 @@
   font-weight: 400;
 
   color: #242424;
-  background-color: rgba(255, 255, 255, 0.144);
+  background-color: rgba(255, 255, 255, 0.137);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -88,9 +88,6 @@
   height: 200px;
 }
 
-.photo-card {
-}
-
 .gallery-image {
   width: 360px;
   height: 152px;
@@ -126,7 +123,9 @@
 
 .loader-container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
 }
 
 .loader {
@@ -162,9 +161,28 @@
 }
 
 .visible {
-  display: inline-block;
+  display: flex;
 }
 
 .load-btn {
   visibility: hidden;
+  margin-bottom: 50px;
+  width: 125px;
+  height: 40px;
+  border-radius: 8px;
+  padding: 8px 16px;
+  gap: 10px;
+  background: #4e75ff;
+  border: none;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+  color: #fff;
+  display: flex;
+}
+
+.load-btn:hover {
+  background-color: #6c8cff;
 }
