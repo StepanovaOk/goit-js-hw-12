@@ -59,6 +59,10 @@ async function getPhoto(event) {
     totalResult = renderPhotos(data.hits, totalHits, totalResult);
   } catch (error) {
     console.log('Error fetching data:', error);
+    iziToast.show({
+      title: 'Error',
+      message: 'Oops, something went wrong',
+    });
   } finally {
     loader.classList.remove('visible');
   }
@@ -148,6 +152,10 @@ async function onLoadMoreClick() {
     smoothScrollToNextGallery();
   } catch (error) {
     console.log('Error fetching data:', error);
+    iziToast.show({
+      title: 'Error',
+      message: 'Oops, something went wrong',
+    });
   } finally {
     loader.classList.remove('visible');
   }
